@@ -1,0 +1,1037 @@
+/* --- 기본 설정 및 폰트 --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    word-break: keep-all;
+}
+
+body {
+    font-family: "GMarketSans";
+    font-weight: 300;
+    overflow: hidden;
+}
+
+.container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+@font-face {
+    font-family: 'GMarketSans';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff');
+    font-weight: 300;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'GMarketSans';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+    font-weight: 500;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'GMarketSans';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+    font-weight: 700;
+    font-display: swap;
+}
+
+img {  user-select: none;}
+
+/* --- 지도 컨테이너 --- */
+.map-container {
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* --- Floating Panel 공통 스타일 --- */
+.floating-panel {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 2000;
+    padding: 25px 20px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.floating-panel.hidden {
+    opacity: 0;    pointer-events: none;    visibility: hidden;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+    user-select: none;
+    cursor: grab;              /* 헤더가 드래그 가능하다는 시각적 신호 */
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 8px;
+}
+.panel-header:active { cursor: grabbing; }
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #4169e1;
+    font-weight: 500;
+}
+.floating-panel.collapsed {
+    height: 55px !important; /* 헤더 높이만큼 고정 */
+    min-height: 55px !important;
+    overflow: hidden;
+}
+.floating-panel.collapsed .t-list-content,
+.floating-panel.collapsed .island-list-wrapper,
+.floating-panel.collapsed .detail-container,
+.floating-panel.collapsed .info-content, 
+.floating-panel.collapsed .pagination-container,
+.floating-panel.collapsed .filter-buttons,
+.floating-panel.collapsed .select-wrapper,
+.floating-panel.collapsed .search-input-box {
+    display: none !important;
+}
+
+/* --- 1. 검색 패널 (왼쪽 상단) --- */
+.search-panel {
+    top: 20px;
+    left: 20px;
+    width: 340px;
+    height: 60vh;      
+    max-height: 90vh;  
+    min-height: 250px; 
+    overflow: hidden;  
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0; 
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+/* 필터 버튼 그룹 */
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-shrink: 0; 
+}
+
+.filter-btn {
+    flex: 1;
+    padding: 6px 5px;
+    font-family: "GMarketSans";
+    border: 1px solid #eee;
+    background-color: #ddd;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.8em;
+    font-weight: 500;
+    color: #555;
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    background-color: #f0f0f0;
+    border-color: #4169e1;
+}
+
+.territorial-btn.active {
+    background-color: #4169e1;
+    color: white;
+    border-color: #4169e1;
+    box-shadow: 0 2px 5px rgba(83, 128, 233, 0.3);
+}
+
+.usable-btn.active {
+    background-color: #27ae60;
+    color: white;
+    border-color: #27ae60;
+    box-shadow: 0 2px 5px rgba(39, 174, 96, 0.3);
+}
+
+.port-btn.active {
+    background-color: #d47070;
+    color: white;
+    border-color: #d47070;
+    box-shadow: 0 2px 5px rgba(85, 85, 85, 0.3);
+}
+
+/* 지역 선택 박스 스타일 */
+.select-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+select.region-select {
+    flex: 1; 
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: "GMarketSans";
+    font-size: 0.9em;
+    min-width: 0;
+    background: #fff;
+}
+
+select:focus {
+    outline: none;
+    border-color: #4169e1;
+}
+
+.search-input-box {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 15px; /* 목록과 간격 */
+    flex-shrink: 0;
+}
+
+.search-input-box input {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: "GMarketSans";
+    font-size: 0.9em;
+    outline: none;
+    background: #fff;
+}
+
+.search-input-box input:focus {
+    border-color: #5380e9;
+}
+
+.search-input-box button {
+    padding: 0 15px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: "GMarketSans";
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.search-input-box button:hover {
+    background-color: #555;
+}
+
+/* 섬 리스트 래퍼 */
+.island-list-wrapper {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    min-height: 0; 
+    overflow: hidden;
+}
+
+.island-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+    padding-right: 15px;
+}
+
+.island-list-header h4 {
+    margin: 0;
+    font-size: 0.9em;
+    color: #666;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.toggle-list-btn {
+    background: none;
+    border: none;
+    font-family: "GMarketSans";
+    font-size: 0.8em;
+    color: #888;
+    cursor: pointer;
+}
+
+/* 리스트 스크롤 스타일 */
+#islandList {
+    overflow-y: auto;     flex: 1;     padding-right: 5px;
+}
+
+#islandList::-webkit-scrollbar {    width: 6px;}
+#islandList::-webkit-scrollbar-thumb {
+    background-color: #ccc; border-radius: 3px;
+}
+#islandList::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.island-list-item {
+    padding: 8px;
+    margin-bottom: 5px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.island-list-item:hover {
+    background-color: #eef4ff;
+}
+
+.island-list-item .island-name {
+    font-weight: 500; 
+    margin-bottom: 3px;
+    font-size: 1em;
+}
+
+.island-list-item .island-address {
+    font-size: 0.8em;
+    color: #888;
+}
+
+/* 리사이즈 핸들 스타일 (공통) */
+.resize-handle {
+    width: 100%;
+    height: 15px;
+    display: flex;
+    top: 0;
+    justify-content: center;
+    align-items: center;
+    cursor: ns-resize;
+    background-color: transparent;
+    border-top: 1px solid #eee;
+    flex-shrink: 0;
+}
+.resize-handle img {
+    width: 16px; 
+    height: 16px; 
+    opacity: 0.4;
+}
+
+.resize-handle:hover { background-color: rgba(83, 128, 233, 0.3); }
+
+.bottom-handle { bottom: 0; }
+/* 상단 핸들 (하단패널용): 맨 위에 붙음 */
+.top-handle { top: 0; }
+
+.sidebar-toggle-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background-color: #4169e1;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 1.2em;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.sidebar-toggle-btn:hover {
+    background-color: #34495e;
+}
+
+.sidebar-toggle-btn.hidden {
+    display: none;
+}
+
+
+/* --- 2. 상세 정보 패널 (왼쪽 하단) --- */
+.detail-panel {
+    cursor: auto; 
+    bottom: 20px;
+    left: 20px;
+    width: 340px; 
+    
+    height: auto;
+    max-height: 60vh;
+    min-height: 200px;
+    resize: none; 
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    
+    padding: 0; 
+    background-color: rgba(255, 255, 255, 0.8); 
+    backdrop-filter: blur(10px); 
+}
+
+.detail-panel .panel-header {
+    padding: 25px 25px 10px 25px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 20;
+}
+
+.detail-container {
+    overflow-y: auto;
+    flex: 1; 
+    padding: 0 25px 15px 25px;
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    color: #888;
+    line-height: 1;
+    padding: 0 5px;
+}
+
+/* Sticky Header */
+.sticky-info-header {
+    position: sticky;
+    top: 0;
+    background-color: white; 
+    z-index: 10;
+    padding: 0 15px 10px 15px;
+    border-bottom: 2px solid #eee;
+    margin: 0 -15px 10px -15px;
+}
+
+.header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 10px;
+    margin-bottom: 10px;
+}
+
+.sticky-info-header h3 {
+    color: #333;
+    margin: 0;
+    font-size: 1.3em;
+}
+
+/* 경로 검색 버튼 스타일 */
+.route-search-btn {
+    display: flex;
+    align-items: center;
+    font-weight: 500; font-size: 1.2em; 
+    gap: 4px;
+    background: white;
+    border: 1px solid #4169e1;
+    border-radius: 20px;
+    padding: 4px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #555;
+}
+
+.route-search-btn:hover {
+    background-color: #769fff;
+    border-color: #769fff;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.route-search-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    filter: invert(100%)​​;
+}
+
+.route-label {
+    font-weight: 300;
+    font-size: 0.8rem;
+    font-family: "GMarketSans";
+}
+
+.travel-info-box {
+    padding: 10px;
+    background-color: #e8f5e9;
+    border-radius: 8px;
+    border: 1px solid #c8e6c9;
+}
+
+.travel-info-box h4 {
+    margin: 0 0 5px 0;
+    color: #2e7d32;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.info-row {
+    margin-bottom: 8px;
+    padding: 8px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+}
+
+.info-row.horizontal {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.info-row.horizontal > div {
+    flex: 1;
+    text-align: center;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #666;
+    font-size: 0.85em;
+    margin-bottom: 3px;
+}
+
+.info-value {
+    color: #333;
+    font-size: 0.95em;
+}
+
+
+/* --- 3. 리스트 박스들 (우측 하단) --- */
+.territorial-list-box, .viewport-list-box, .port-list-box {
+    position: absolute;
+    width: 250px;
+    max-height: 70vh;  min-height: 150px;
+    resize: none; 
+    overflow: hidden;
+
+    /* 커서는 패널 전체가 아니라 핸들에서만 */
+    cursor: auto; 
+    
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    font-family: "GMarketSans";
+    padding: 0;
+}
+
+/* 영해기점 목록 */
+.territorial-list-box {
+    bottom: 20px;
+    right: 280px;
+    height: 300px;
+}
+
+/* 뷰포트 목록 */
+.viewport-list-box {
+    bottom: 20px;
+    right: 20px;
+    z-index: 1900;
+    max-height: 300px !important; 
+    height: auto; 
+}
+
+/* 항구 목록 */
+.port-list-box {
+    bottom: 340px; 
+    right: 20px;
+    max-height: 300px; 
+    overflow-y: auto;
+}
+
+.territorial-list-box.hidden, .viewport-list-box.hidden, .port-list-box.hidden {
+    display: none;
+}
+
+.t-list-header {
+    padding: 12px 20px;
+    background-color: rgba(83, 128, 233, 0.6);
+    backdrop-filter: blur(5px);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px 8px 0 0;
+    flex-shrink: 0;
+}
+
+#viewportListBox .t-list-header {
+    background-color: #8fc2f4;
+}
+
+.t-list-header h4 {
+    margin: 0;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.close-btn-white {
+    background: none;    border: none;
+    color: white;    font-size: 1.2em;
+    cursor: pointer;
+}
+
+/* 리스트 컨텐츠 */
+.t-list-content, .viewport-content { 
+    padding: 5px 12px; 
+    background: rgb(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
+    flex: 1; /* 부모 크기에 맞춰 늘어남 */
+    overflow-y: auto;
+    max-height: none !important; 
+    position: relative; 
+}
+
+.t-list-item {
+    padding: 8px 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #fff;
+    margin-bottom: 5px;
+    border-radius: 6px;
+}
+
+.t-list-item:last-child {
+    border-bottom: none;
+}
+
+.t-list-item:hover {
+    background-color: #f0f8ff;
+}
+
+.t-name {
+    font-size: 0.95em;
+    font-weight: 500;
+    color: #333;
+}
+
+.t-addr {
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 2px;
+}
+
+/* 영해기점 정보 패널 */
+.territorial-info-panel {
+    top: 50px;       
+    left: 50%;       
+    transform: translateX(-50%); 
+    width: auto;     
+    max-width: 80%;  
+    padding: 15px 25px;
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
+    
+    display: flex;
+    flex-direction: row; 
+    align-items: center;
+    flex-wrap: nowrap;     
+    justify-content: flex-start; 
+    text-align: left;
+    
+    border-radius: 50px; 
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+.territorial-info-panel .panel-header {
+    margin-bottom: 0; 
+    margin-right: 15px;
+    flex-shrink: 0; 
+}
+.territorial-info-panel .panel-header h3 {
+    color: #2e6dff;
+    font-weight: 500; 
+    font-size: 1.1em;
+    white-space: nowrap; 
+}
+.territorial-info-panel .info-content {
+    font-size: 0.95em;
+    line-height: 1.3;
+    color: #333;
+    flex: 1; 
+    white-space: normal; 
+    word-break: keep-all;
+}
+.territorial-info-panel .close-btn {
+    font-size: 1.5em;
+    margin-left: 10px;
+    flex-shrink: 0;
+}
+
+/* --- 4. 지도 컨트롤 (우측 상단) --- */
+.map-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    backdrop-filter:  blur(5px);
+    z-index: 1000;
+    min-width: 200px;
+}
+
+.custom-zoom-controls {
+    display: flex;
+    flex-direction: row;
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    background: transparent;
+    margin-bottom: 10px; 
+    text-decoration-line: none;
+}
+
+.custom-zoom-controls a {
+    font-weight: 500;
+    background-color: transparent;
+    color: #333 !important; 
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+    display: block;
+    cursor: pointer;
+}
+
+.custom-zoom-controls a:hover {
+    background-color: #f0f0f0 !important;
+}
+
+.custom-zoom-controls a:last-child {
+    border-bottom: none !important;
+}
+
+#custom-zoom-korea {
+    background-image: url("img/mini.svg");
+    background-repeat: no-repeat;
+    width: 25px;
+    background-size: contain;
+    background-position: center;
+    text-indent: -9999px; 
+    overflow: hidden;
+}
+
+#custom-zoom-in {
+    background-image: url("img/exp.svg");
+    background-repeat: no-repeat;
+    width: 25px;
+    background-size: contain;
+    background-position: center;
+    text-indent: -9999px; 
+    overflow: hidden;
+}
+
+#custom-zoom-out {
+    background-image: url("img/red.svg");
+    background-repeat: no-repeat;
+    width: 25px;
+    background-size: contain;
+    background-position: center;
+    text-indent: -9999px; 
+    overflow: hidden;
+}
+
+.map-controls h3 {
+    margin: 0 0 10px 0;
+    font-size: 1em;
+    color: #4169e1;
+    font-weight: 500;
+}
+
+.style-buttons {
+    font-family: "GMarketSans";
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.style-btn {
+    font-family: "GMarketSans";
+    padding: 8px 15px;
+    border: 1.5px solid #ddd;
+    background-color: #dddddd;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.style-btn:hover {
+    background-color: #fefefe;
+    border-color: #4169e1;
+}
+
+.style-btn.active {
+    background-color: #4169e1;
+    color: white;
+    border-color: #4169e1;
+}
+
+/* --- Leaflet 툴팁 커스텀 --- */
+.leaflet-tooltip {
+    font-family: "GMarketSans";
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 0.8rem; 
+    min-width: 200px !important;
+    max-width: 300px!important; 
+    max-height: 300px; 
+    overflow-y: auto;
+    white-space: normal; 
+    word-break: keep-all;
+    
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    min-width: 150px;
+}
+
+.tooltip-title {
+    font-weight: 500;
+    color: #4169e1;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 5px;
+}
+
+.territorial-badge {
+    color: #00008B;
+    font-size: 0.8em;
+    font-weight: 300;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+.usable-badge {
+    color: #27ae60;
+    font-size: 0.8em;
+    font-weight: 300;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+.tooltip-info {
+    margin: 3px 0;
+    color: #555;
+}
+
+.tooltip-info strong {
+    color: #333;
+}
+
+/* --- 마커 아이콘 스타일 --- */
+.territorial-marker-icon {
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.territorial-highlight {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9));
+    z-index: 9999 !important;
+}
+
+.usable-marker-icon {
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.usable-highlight {
+    filter: drop-shadow(0 0 8px rgba(39, 174, 96, 0.8));
+    z-index: 9000 !important;
+}
+
+.custom-svg-marker {
+    background: none;
+    border: none;
+}
+
+.port-marker-icon {
+    background: none;
+    border: none;
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    color: rgba(253, 36, 62, 0.7); 
+}
+
+.port-marker-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-shadow: 0 0 5px white; 
+    transition: font-size 0.1s ease; 
+}
+
+/* --- 클러스터 아이콘 색상 커스텀 --- */
+.marker-cluster-usable-small { 
+    background-color: rgba(46, 204, 113, 0) !important; 
+    box-shadow: 0 0 0 5px rgba(46, 204, 113, 0.4); 
+    border-radius: 50%; 
+}
+.marker-cluster-usable-small div { 
+    background-color: rgba(44, 217, 116, 0.9) !important; 
+    color: white !important; 
+}
+
+.marker-cluster-usable-medium { 
+    background-color: rgba(46, 204, 113, 0) !important; 
+    box-shadow: 0 0 0 5px rgba(46, 204, 113, 0.4); 
+    border-radius: 50%; 
+}
+.marker-cluster-usable-medium div { 
+    background-color: rgba(0, 167, 72, 0.9) !important; 
+    color: white !important; 
+}
+
+.marker-cluster-usable-large { 
+    background-color: rgba(46, 204, 113, 0) !important; 
+    box-shadow: 0 0 0 5px rgba(44, 217, 116, 0.4); 
+    border-radius: 50%; 
+}
+.marker-cluster-usable-large div { 
+    background-color: rgba(10, 61, 32, 0.9) !important; 
+    color: white !important; 
+}
+
+/* 기본 클러스터 */
+.marker-cluster-small {
+    background-color: rgba(79, 184, 254, 0) !important;
+    box-shadow: 0 0 15px 5px rgba(101, 199, 255, 0.5);
+    border-radius: 50%;
+}
+
+.marker-cluster-small div {
+    background-color: rgba(88, 149, 255, 0.8) !important;
+    color: white !important;
+}
+
+.marker-cluster-medium {
+    background-color: rgba(84, 118, 243, 0) !important;
+    box-shadow: 0 0 15px 5px rgba(77, 151, 255, 0.5);
+    border-radius: 50%;
+}
+
+.marker-cluster-medium div {
+    background-color: rgba(54, 61, 255, 0.8) !important;
+    color: white !important;
+}
+
+.marker-cluster-large {
+    background-color: rgba(207, 207, 208, 0) !important;
+    box-shadow: 0 0 15px 5px rgba(137, 161, 255, 0.5);
+    border-radius: 50%;
+}
+
+.marker-cluster-large div {
+    background-color: rgba(32, 32, 32, 0.8) !important;
+    color: white !important;
+}
+
+.marker-cluster div {
+    font-family: "GMarketSans";
+    font-weight: 500;
+}
+
+.region-highlight-polygon {
+    stroke: #ffffff !important;
+    stroke-width: 1px !important;
+    stroke-linejoin: round !important;
+    filter: drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 10px #ffffff) drop-shadow(0 0 15px #ffffff);
+}
+
+/* --- Back 버튼 스타일 --- */
+.back-btn {
+    position: absolute;
+    top: 30px;
+    right: 35px;
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border-radius: 4px !important; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+.back-btn img {
+    width: 20px;
+    height: 20px;
+    transition: opacity 0.2s ease;
+}
+
+.back-btn:hover {
+    background-color: #f0f0f0;
+}
+
+/* --- BGM 버튼 스타일 --- */
+.bgm-btn {
+    position: fixed;
+    top: 30px;
+    right: 230px; 
+    z-index: 2000;
+    width: 40px;
+    height: 40px;
+    border-radius: 100px; 
+    border: none;
+    background-color: rgb(240, 240, 240, 0.8); 
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.bgm-btn img {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
+.bgm-btn:hover {
+    background-color: #b5daff;
+    box-shadow: 0 2px 8px rgb(143, 194, 244, 0.8);
+}
+
+/* --- [수정] 하단 리스트 패널 3개 강제 접기 스타일 --- */
+/* 이 패널들은 floating-panel 클래스가 없어서 따로 지정해야 함 */
+.port-list-box.collapsed,
+.territorial-list-box.collapsed,
+.viewport-list-box.collapsed {
+    height: 55px !important;       /* 헤더 높이로 강제 고정 */
+    min-height: 55px !important;   /* 기존 min-height 무시 */
+    overflow: hidden !important;   /* 내용물 숨김 */
+    padding-bottom: 0 !important;  /* 패딩 제거 */
+    transition: height 0.3s ease;  /* 부드럽게 */
+}
+
+/* 접혔을 때 내부 내용물 아예 안 보이게 처리 (잔상 방지) */
+.port-list-box.collapsed .t-list-content,
+.territorial-list-box.collapsed .t-list-content,
+.viewport-list-box.collapsed .t-list-content,
+.port-list-box.collapsed .pagination-container,
+.territorial-list-box.collapsed .pagination-container,
+.viewport-list-box.collapsed .pagination-container {
+    display: none !important;
+}

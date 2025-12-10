@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>무인도서 아카이브 지도</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    
+    <meta name="description" content="영해기점, 이용 가능 도서, 근처 항구 정보까지 제공하며, 다양한 지도 스타일과 필터 기능으로 상세 정보를 편리하게 찾아볼 수 있는 웹 아카이브입니다. 잔잔한 파도 소리와 함께 한국의 무인도서를 지도 위에서 탐험하세요. ">
+
+    <link rel="stylesheet" href="style.css" />
+    <meta property="og:title" content="무인도서 아카이브 지도">
+    <meta property="og:image" content="img/thumb-map.jpg">
+    <meta property="og:site_name" content="무인도서 아카이브">
+    <meta property="og:url" content="">
+    <meta property="og:type" content="website">
+
+
+</head>
+<body>
+    <div class="container">
+        <audio id="bgmAudio" src="img/ocean.mp3" loop></audio>
+
+        <a href="index.html" class="back-btn" title="메인으로 돌아가기" id="backBtn">
+            <img src="img/home.svg" alt="Back">
+        </a>
+        <button id="bgmBtn" class="bgm-btn" title="파도 소리 켜기/끄기">
+            <img src="img/play.svg" alt="재생">
+        </button>
+        
+        <!-- SEARCH PANEL (절대 수정하지 않음) -->
+        <div id="searchPanel" class="floating-panel search-panel">
+            <div class="panel-header">
+                <h3>지역별 찾기</h3>
+                <button id="toggleSearchPanelBtn" class="close-btn" style="font-size: 1.2em;">◀</button>
+            </div>
+            
+            <div class="filter-buttons">
+                <button id="territorialToggleBtn" class="filter-btn territorial-btn" title="영해기점만 따로 보기">⚓ 영해기점</button>
+                <button id="usableToggleBtn" class="filter-btn usable-btn" title="이용가능/개발가능/준보전 도서만 따로 보기">🚶 이용가능</button>
+                <button id="portToggleBtn" class="filter-btn port-btn" title="주요 항구 보기">🚢&nbsp; 항구</button>
+            </div>
+
+            <div class="select-wrapper">
+                <select id="regionSelect" class="region-select">
+                    <option value="">전체</option>
+                    <option value="경기도">경기•인천</option>
+                    <option value="강원도">강원특별자치도</option>
+                    <option value="충청도">충청도</option>
+                    <option value="전라북도">전북특별자치도</option>
+                    <option value="전라남도">전라남도</option>
+                    <option value="경상북도">경상북도</option>
+                    <option value="경상남도">경상남도</option>
+                    <option value="제주도">제주특별자치도</option>
+                </select>
+                <select id="sigunguSelect" class="region-select" style="display: none;">
+                    <option value="">전체</option>
+                </select>
+            </div>
+
+            <div class="search-input-box">
+                <input type="text" id="keywordInput" placeholder="섬 이름 검색" />
+                <button id="searchBtn">검색</button>
+            </div>
+
+            <div class="island-list-wrapper">
+                <div class="island-list-header">
+                    <h4>섬 목록</h4>
+                    <button id="toggleIslandList" class="toggle-list-btn">펼치기 ▼</button>
+                </div>
+                
+                <div id="islandList" class="island-list" style="display: none;"></div>
+            </div>
+
+            <!-- searchPanel은 기존 bottom handle 유지 (요청사항) -->
+            <div class="resize-handle bottom-handle"></div>
+        </div>
+        <!-- /SEARCH PANEL -->
+
+        <!-- Territorial Info Panel (small info popup) -->
+        <div id="territorialInfoPanel" class="floating-panel territorial-info-panel hidden">
+            <div class="panel-header">
+                <h3>영해기점</h3>
+                <div class="header-controls">
+                    <button id="toggleTerritorialInfo" class="close-btn" style="font-size: 1.2em;">−</button>
+                    <button id="closeTerritorialInfo" class="close-btn">×</button>
+                </div>
+            </div>
+            <div class="info-content">
+                <p>국토 최외곽에 위치해, 유엔해양법협약에 따라 우리나라의 <span style="font-weight: 500;">해양 관할권 외측 한계</span>를 결정하는 시작점</p>
+            </div>
+        </div>
+
+        <!-- DETAIL PANEL (왼쪽 하단) - 하단 핸들 제거, 헤더로 리사이즈 -->
+        <div id="detailPanel" class="floating-panel detail-panel hidden" data-header-resize="true">
+            <div class="panel-header">
+                <h3>상세 정보</h3>
+                <div class="header-controls">
+                    <button id="toggleDetailPanel" class="close-btn" style="font-size: 1.2em;">−</button>
+                    <button id="closeDetailPanel" class="close-btn">×</button>
+                </div>
+            </div>
+            <div id="detailContainer" class="detail-container"></div>
+            <!-- bottom resize handle removed for header-resize panels -->
+        </div>
+
+        <div id="map" class="map-container"></div>
+        
+        <button id="openSearchPanelBtn" class="sidebar-toggle-btn hidden" title="검색창 열기">▶</button>
+
+        <!-- PORT LIST BOX (우측 하단) - 하단 핸들 제거 -->
+        <div id="portListBox" class="port-list-box hidden" data-header-resize="true"> 
+            <div class="t-list-header" style="background-color: #d47070;">
+                <h4>🚢 &nbsp;항구 목록</h4>
+                <div class="header-controls">
+                    <button id="togglePortList" class="close-btn-white" style="font-size: 1.2em;">−</button>
+                    <button id="closePortList" class="close-btn-white">×</button>
+                </div>
+            </div>
+            <div id="portListContent" class="t-list-content"></div>
+        </div>
+
+        <!-- TERRITORIAL LIST BOX (우측 하단) - 하단 핸들 제거 -->
+        <div id="territorialListBox" class="territorial-list-box hidden" data-header-resize="true"> 
+            <div class="t-list-header">
+                <h4>⚓ 영해기점 목록</h4>
+                <div class="header-controls">
+                    <button id="toggleTerritorialList" class="close-btn-white" style="font-size: 1.2em;">−</button>
+                    <button id="closeTerritorialList" class="close-btn-white">×</button>
+                </div>
+            </div>
+            <div id="territorialListContent" class="t-list-content"></div>
+            <div id="territorialPagination" class="pagination-container"></div>
+        </div>
+
+        <!-- VIEWPORT LIST BOX (우측 하단) - 하단 핸들 제거 -->
+        <div id="viewportListBox" class="viewport-list-box hidden" data-header-resize="true">
+            <div class="t-list-header" style="background-color: #8fc2f4;">
+                <h4 id="viewportCount">현재 화면의 섬 (0)</h4>
+                <div class="header-controls">
+                    <button id="toggleViewportList" class="close-btn-white" style="font-size: 1.2em;">−</button>
+                    <button id="closeViewportList" class="close-btn-white">×</button>
+                </div>
+            </div>
+            <div id="viewportListContent" class="t-list-content viewport-content">
+                <p style="padding:10px; color:#999; font-size:0.8em;">지도를 확대하면 목록이 보입니다.</p>
+            </div>
+        </div>
+
+        <div class="map-controls">
+            <div class="custom-zoom-controls">
+                <a id="custom-zoom-in" href="#" title="Zoom in" role="button" aria-label="Zoom in"></a>
+                <a id="custom-zoom-out" href="#" title="Zoom out" role="button" aria-label="Zoom out"></a>
+                <a id="custom-zoom-korea" href="#" title="전체 보기" role="button" aria-label="전체 보기"></a>
+            </div>
+            <h3>지도 스타일</h3>
+            <div class="style-buttons">
+                <button class="style-btn active" data-style="satellite">위성</button>
+                <button class="style-btn" data-style="mystyle">일반</button>
+                <button class="style-btn" data-style="dark">다크</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
