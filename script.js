@@ -1,9 +1,9 @@
 // ============================================================
 //  script.js (FINAL FIXED VERSION)
-//  - [FIXED] 이용가능 필터 토글 시 시군구 필터 사라짐 현상 해결 (로직 복구)
+//  - [FIXED] 영해기점 필터 OFF 시 -> 일반(파란) 마커로 전환 로직 추가
+//  - [FIXED] 이용가능 필터 토글 시 시군구 Select 유지
 //  - SearchPanel 접기/펼치기 정상 작동
-//  - 지도 이동 속도 개선 (setView)
-//  - 리사이즈 핸들 위치 (검색:하단, 나머지:상단)
+//  - 지도 이동: setView (빠름)
 // ============================================================
 
 // -------------------------------
@@ -302,7 +302,9 @@ async function loadIslands() {
             const lng = dmsToDecimal(island.Column24);
             const iName = island['무인도서 정보'];
             const isUsable = checkIsUsable(island);
+            const isTerritorial = checkIsTerritorial(island);
 
+            // 경로 그리기용 좌표 저장
             if (lat && lng) {
                 const sigungu = island.Column4 || "";
                 const eupmyeondong = island.Column5 || "";
@@ -313,9 +315,32 @@ async function loadIslands() {
                 else islandCoords[iName] = [lat, lng];
             }
 
+            // 마커 생성 로직
             if (lat && lng) {
                 const isException = (iName === "할미도" || iName === "횡경도" || iName === "소횡경도");
-                if (isUsableActive && !isUsable && !isException) return;
+                
+                // [수정] 영해기점 필터가 꺼져있고(false) && 이 섬이 영해기점이면 -> 필터 무시하고 일반 마커로 생성
+                // 그렇지 않으면 기존 필터(isUsableActive) 적용
+                if (isTerritorialActive && isTerritorial) {
+                    // 영해기점 활성화 상태 -> 여기선 생성 안함 (updateTerritorialLayer에서 처리)
+                    return;
+                }
+                
+                // 영해기점이 아니거나, 영해기점 필터가 꺼져있는 경우
+                // 필터링 적용: 이용가능이 켜져있으면 이용가능만, 아니면 전부
+                // 단, 영해기점 필터가 꺼져서 넘어온 영해기점 섬은 무조건 표시해야 함
+                let showThis = true;
+                if (isUsableActive && !isUsable && !isException) {
+                    // 이용가능 필터가 켜져있는데 이용가능이 아닌 경우
+                    // 만약 이 섬이 영해기점이고 영해기점 필터가 꺼져있다면 -> 보여줌 (구제)
+                    if (isTerritorial && !isTerritorialActive) {
+                        showThis = true;
+                    } else {
+                        showThis = false;
+                    }
+                }
+
+                if (!showThis) return;
 
                 const treatAsUsable = (isUsable && isUsableActive) || (isUsableActive && isException);
                 const marker = L.marker([lat, lng], {
@@ -354,6 +379,7 @@ async function loadIslands() {
         }
         tryDrawRoutes();
 
+        // 초기 목록 표시
         updateIslandList("");
 
     } catch (error) { console.error('Error:', error); }
@@ -535,7 +561,6 @@ function updateIslandList(regionName, sigungu = '') {
     const header = document.querySelector('.island-list-header h4');
     let islands = getIslandsByRegion(regionName);
     
-    // 자동 펼치기
     const list = document.getElementById('islandList');
     const toggleBtn = document.getElementById('toggleIslandList');
     const searchPanel = document.getElementById('searchPanel');
@@ -566,7 +591,7 @@ function updateIslandList(regionName, sigungu = '') {
     currentIslandListItems = islands;
 
     if (!regionName) {
-        document.getElementById('sigunguSelect').style.display = 'none';
+        document.getElementById('sigunguSelect').style.display = 'block';
         if (header) header.textContent = '섬 목록';
         if(regionPolygon) map.removeLayer(regionPolygon);
         renderIslandList();
@@ -697,7 +722,7 @@ document.addEventListener("DOMContentLoaded", () => {
         map.setView([36.5, 127.5], 7, { animate: true });
         if(regionPolygon) map.removeLayer(regionPolygon);
         document.getElementById('regionSelect').value = "";
-        document.getElementById('sigunguSelect').style.display = 'none';
+        document.getElementById('sigunguSelect').style.display = 'block';
         updateIslandList("");
     };
 
@@ -773,6 +798,10 @@ document.addEventListener("DOMContentLoaded", () => {
     tBtn.onclick = function() {
         isTerritorialActive = !isTerritorialActive;
         this.classList.toggle('active');
+        
+        // [FIX] 영해기점 필터 토글 시 전체 마커 다시 로드 (파란 마커 <-> 빨간 마커 전환)
+        loadIslands();
+
         if(isTerritorialActive) {
             updateTerritorialListUI();
             document.getElementById('territorialListBox').classList.remove('hidden');
@@ -785,28 +814,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // [FIX] 이용가능 필터 로직 복구 (시군구 필터 유지)
     uBtn.onclick = function() {
-    isUsableActive = !isUsableActive;
-    this.classList.toggle('active');
-
-    loadIslands();
-
-    // ✔ 시군구 필터 유지용 로직 복구!
-    let islands = getIslandsByRegion(rSel.value);
-    if (isUsableActive) {
-        islands = islands.filter(i => {
-            const name = i['무인도서 정보'];
-            const isException = (name === "할미도" || name === "횡경도" || name === "소횡경도");
-            return checkIsUsable(i) || isException;
-        });
-    }
-    updateSigunguSelect(islands);  // ← ★ 이 한 줄이 핵심!
-
-    updateIslandList(rSel.value, sSel.value);
-    updateViewportList();
-};
-
+        isUsableActive = !isUsableActive;
+        this.classList.toggle('active');
+        
+        loadIslands(); 
+        
+        // 시군구 목록을 강제로 다시 그리지 않음 (updateSigunguSelect 제거)
+        updateIslandList(rSel.value, sSel.value);
+        updateViewportList();
+    };
 
     pBtn.onclick = function() {
         isPortActive = !isPortActive;
