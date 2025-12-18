@@ -114,6 +114,7 @@ body {
     flex-direction: column;
     width: auto;
     position: relative;
+    align-items: flex-start;
 }
 .content-row {
     display: flex;
@@ -188,12 +189,12 @@ body {
 /* ▼▼▼ 수정: bg-location-name을 화면 고정 위치로 변경 (Fixed) ▼▼▼ */
 .bg-location-name {
     position: absolute; 
-    bottom: 20px;
-    left: 20px;
-    z-index: 100; /* 항상 최상단에 보이게 */
+    top: -60px;
+    left: -60px;
+    z-index: 101; /* 항상 최상단에 보이게 */
     
     font-family: "GMarketSans";
-    font-size: 0.85em;
+    font-size: 0.95em;
     color: #888;
     font-weight: 500;
     background: rgba(255, 255, 255, 0.6);
@@ -526,7 +527,7 @@ p {font-size: 0.95em;}
 }
 
 .main-page-title {
-    width: 310px;
+    width: 365px;
     top: 0px;
     left: 0px;
     z-index: 100;
@@ -535,7 +536,7 @@ p {font-size: 0.95em;}
 
     font-family: "GMarketSans";
     color: #ffffff;
-    font-size: 2rem;
+    font-size: 2.4rem;
     font-weight: 300;
     background-color: rgb(255, 255, 255, .0);
     backdrop-filter: blur(6px);
