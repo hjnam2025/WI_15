@@ -31,6 +31,7 @@ let currentViewportItems = [];
 let isTerritorialActive = true;
 let isUsableActive = true;
 let isPortActive = true;
+let isRouteActive = false;
 
 // 경로 데이터
 const ferryRoutes = [
